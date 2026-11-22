@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#6A1B9A"
+        android:pathData="M24,4C16.3,4 10,10.3 10,18c0,10.5 14,26 14,26s14,-15.5 14,-26c0,-7.7 -6.3,-14 -14,-14z"/>
+    <!-- cross / medical -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,12h4v6h6v4h-6v6h-4v-6h-6v-4h6z"/>
+</vector>

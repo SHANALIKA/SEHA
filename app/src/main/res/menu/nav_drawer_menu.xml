@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/home"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/nav_medicine"
+            android:icon="@drawable/orders"
+            android:title="My Medicine" />
+
+        <item
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/orders"
+            android:title="My Orders" />
+
+        <item
+            android:id="@+id/nav_records"
+            android:icon="@drawable/orders"
+            android:title="My Medical Records" />
+
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/account"
+            android:title="Profile" />
+
+        <item
+            android:id="@+id/nav_edit_profile"
+            android:icon="@drawable/editpen"
+            android:title="Edit Profile" />
+
+    </group>
+
+    <item android:title="Emergency">
+        <menu>
+            <item
+                android:id="@+id/nav_face_scan"
+                android:icon="@drawable/person"
+                android:title="Emergency Face Scan" />
+
+            <item
+                android:id="@+id/nav_sos"
+                android:icon="@drawable/call"
+                android:title="SOS Alert" />
+
+            <item
+                android:id="@+id/nav_ambulance"
+                android:icon="@drawable/call"
+                android:title="Ambulance Tracking" />
+        </menu>
+    </item>
+
+    <item android:title="Account">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/backarrow"
+                android:title="Logout" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }   // includes anonymous sign-in
+
+    function myRole() {
+      return get(/databases/$(database)/documents/Patients/$(request.auth.uid)).data.get('role', 'patient');
+    }
+    function isStaff() { return signedIn() && myRole() in ['nurse', 'hospital']; }
+
+    // User profiles. Anyone signed in (also anonymous = emergency face scan) can read.
+    // Only the owner can change their own profile, and nobody can change their own ROLE afterwards.
+    match /Patients/{uid} {
+      allow read: if signedIn();
+      allow create, delete: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.get('role', 'patient') == resource.data.get('role', 'patient');
+    }
+
+    // Medical records (X-ray, blood report, history...). Only a logged-in nurse can ADD a record,
+    // and it is stamped with that nurse's uid. Records can NEVER be edited or deleted afterwards.
+    match /Patients/{uid}/records/{rid} {
+      allow read: if signedIn();
+      allow create: if isStaff() && request.resource.data.nurseUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Live ambulance fleet, hospitals and ambulance requests
+    match /ambulances/{id}  { allow read, write: if signedIn(); }
+    match /hospitals/{id}   { allow read, write: if signedIn(); }
+    match /requests/{id}    { allow read, write: if signedIn(); }
+
+    // SOS alerts (patient -> nearest hospital) and the patient's live GPS position (guardian / hospital map)
+    match /sos_alerts/{id}      { allow read, write: if signedIn(); }
+    match /liveLocations/{id}   { allow read, write: if signedIn(); }
+
+    // Existing collections of the app
+    match /AmbulanceTracks/{id} { allow read, write: if signedIn(); }
+    match /Emergencies/{id}     { allow read, write: if signedIn(); }
+    match /Orders/{id}          { allow read, write: if signedIn(); }
+  }
+}

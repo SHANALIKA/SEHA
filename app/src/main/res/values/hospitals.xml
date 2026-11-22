@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Hospital combo box (sign up + login). Government hospitals of Sri Lanka.
+        Format:  Hospital name|latitude|longitude|e
+          - "e" at the end = EXACT, verified position (used as it is).
+          - no "e"        = approximate town position. The real position of the hospital is found
+                            automatically from OpenStreetMap when the hospital signs up, and the
+                            hospital can correct it with "Choose my hospital from the map list".
+        The first item is only the "Select hospital" hint.
+        To add a hospital: copy latitude / longitude from Google Maps (long-press on the hospital).
+    -->
+    <string-array name="hospital_catalog">
+        <item>Select hospital</item>
+
+        <!-- Western Province -->
+        <item>National Hospital of Sri Lanka (Colombo)|6.919144|79.868027|e</item>
+        <item>Colombo South Teaching Hospital (Kalubowila)|6.86722|79.87667|e</item>
+        <item>Colombo North Teaching Hospital (Ragama)|7.0278|79.9167</item>
+        <item>Sri Jayewardenepura General Hospital (Kotte)|6.868416|79.925182|e</item>
+        <item>Neville Fernando Teaching Hospital (Malabe)|6.924688|79.962812|e</item>
+        <item>Castle Street Hospital for Women (Colombo)|6.9141|79.8800</item>
+        <item>Lady Ridgeway Hospital for Children (Colombo)|6.9159|79.8764</item>
+        <item>De Soysa Maternity Hospital (Colombo)|6.9190|79.8600</item>
+        <item>National Cancer Institute (Maharagama)|6.8470|79.9270</item>
+        <item>Negombo District General Hospital|7.2125645|79.8485057|e</item>
+        <item>Gampaha District General Hospital|7.0917|80.0000</item>
+        <item>Wathupitiwala Base Hospital|7.1630|80.0030</item>
+        <item>Panadura Base Hospital|6.7133|79.9042</item>
+        <item>Horana District General Hospital|6.7160|80.0620</item>
+        <item>Kalutara General Hospital (Nagoda)|6.5870|79.9680</item>
+        <item>Avissawella District General Hospital|6.9533|80.2100</item>
+
+        <!-- Central Province -->
+        <item>National Hospital Kandy (Teaching Hospital Kandy)|7.2920|80.6350</item>
+        <item>Teaching Hospital Peradeniya|7.266523|80.597676|e</item>
+        <item>Matale District General Hospital|7.4710|80.6230</item>
+        <item>Nuwara Eliya District General Hospital|6.9690|80.7670</item>
+        <item>Gampola Base Hospital|7.1640|80.5700</item>
+
+        <!-- Southern Province -->
+        <item>Karapitiya Teaching Hospital (Galle)|6.066531|80.225569|e</item>
+        <item>Matara District General Hospital|5.9480|80.5370</item>
+        <item>Hambantota District General Hospital|6.1280|81.1180</item>
+
+        <!-- Sabaragamuwa Province -->
+        <item>Ratnapura Provincial General Hospital|6.6870|80.4000</item>
+        <item>Kegalle District General Hospital|7.2530|80.3470</item>
+
+        <!-- Uva Province -->
+        <item>Badulla Provincial General Hospital|6.9890|81.0550</item>
+        <item>Monaragala District General Hospital|6.8730|81.3490</item>
+
+        <!-- North Western Province -->
+        <item>Teaching Hospital Kurunegala|7.4870|80.3650</item>
+        <item>Kuliyapitiya Teaching Hospital|7.4700|80.0400</item>
+        <item>Chilaw General Hospital|7.5750|79.7960</item>
+        <item>Puttalam Base Hospital|8.0330|79.8280</item>
+
+        <!-- North Central Province -->
+        <item>Teaching Hospital Anuradhapura|8.3500|80.4000</item>
+        <item>Polonnaruwa District General Hospital|7.9400|81.0030</item>
+
+        <!-- Northern Province -->
+        <item>Teaching Hospital Jaffna|9.6760|80.0100</item>
+        <item>Vavuniya District General Hospital|8.7510|80.4970</item>
+        <item>Mannar District General Hospital|8.9810|79.9040</item>
+        <item>Kilinochchi District General Hospital|9.3960|80.4020</item>
+        <item>Mullaitivu District General Hospital|9.2670|80.8140</item>
+
+        <!-- Eastern Province -->
+        <item>Batticaloa Teaching Hospital|7.7075556|81.6906389|e</item>
+        <item>Ampara General Hospital|7.2980|81.6720</item>
+        <item>Trincomalee General Hospital|8.5700|81.2330</item>
+        <item>Ashraff Memorial Base Hospital (Kalmunai)|7.4110|81.8200</item>
+    </string-array>
+</resources>

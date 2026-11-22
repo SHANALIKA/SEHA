@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "549671224886",
+    "project_id": "seha99",
+    "storage_bucket": "seha99.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549671224886:android:a8c5f75c0264dbdf36fa97",
+        "android_client_info": {
+          "package_name": "com.example.seha"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGSyEJM4fNic7O6Soa_tA874McnJnDAFI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -89,6 +89,18 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 
 ---
 
+## 🎥 App Demonstration Video
+
+Watch the SEHA Android application demonstration to explore its main features, user interfaces, and emergency healthcare workflows.
+
+<p align="center">
+  <a href="https://drive.google.com/file/d/1fYAKA-eHXz0uMt981xZUZHwYV8IjjxQD/view?usp=sharing">
+    ▶️ **Watch SEHA App Demo Video**
+  </a>
+</p>
+
+---
+
 ## 🛠️ Technology Stack
 
 | Category | Technologies |

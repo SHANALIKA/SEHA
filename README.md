@@ -1,3 +1,4 @@
+
 # 🏥 SEHA
 ### Smart Emergency & Healthcare Assistance
 
@@ -39,6 +40,7 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 ## ✨ Core Features
 
 ### 👤 Patient Module
+
 - Secure patient registration and authentication.
 - Personalized patient profiles and emergency medical information.
 - Store blood group, allergies, and medical conditions.
@@ -50,8 +52,9 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 - View medicine and order information.
 
 ### 🚑 Ambulance Module
+
 - Authentication using registered vehicle numbers.
-- Online and offline availability management.
+- Online / offline availability management.
 - Receive, accept, or decline ambulance requests.
 - Share live GPS location.
 - Provide emergency updates to patient guardians.
@@ -59,6 +62,7 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 - Complete ambulance trips upon hospital arrival.
 
 ### 👩‍⚕️ Nurse Module
+
 - Authentication using registered NIC numbers.
 - View incoming ambulances assigned to the hospital.
 - Track ambulances using vehicle numbers.
@@ -68,6 +72,7 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 - Add medical records, clinical notes, and images.
 
 ### 🏥 Hospital Module
+
 - Hospital-specific authentication.
 - Manage registered ambulance fleets.
 - Monitor active ambulance trips.
@@ -76,6 +81,7 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 - View nurse information and ambulance availability.
 
 ### 👨‍👩‍👧 Guardian Module
+
 - Track patients using Patient ID and username verification.
 - View shared live patient locations.
 - Monitor ambulance journeys.
@@ -107,34 +113,135 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 
 SEHA follows a role-based application structure where different users interact with the system through dedicated modules.
 
+### System Architecture
+
+**Figure 4.0 – System Architecture (SEHA)**
+
+![System Architecture](docs/images/figure-4.0-system-architecture.webp)
+
+The SEHA Android application (Java, minSdk 24) serves five user roles: **Patient**, **Ambulance driver**, **Nurse**, **Hospital staff**, and **Guardian** (no account).
+
+It communicates with:
+
+- **Firebase** — Authentication, Cloud Firestore (real-time), Cloud Storage.
+- **Face Recognition Server** — Python Flask + DeepFace (`/register`, `/recognize`, `/photo`).
+- **Maps & Routing** — osmdroid (OpenStreetMap / Esri tiles), OSRM (road route + ETA), Overpass API.
+- **Device Services** — Fused Location (GPS), CameraX, SmsManager.
+
+---
+
+### Class / Module Diagram
+
+**Figure 4.2 – Class / Module Diagram (package `com.example.seha`)**
+
+![Class / Module Diagram](docs/images/figure-4.2-class-module-diagram.webp)
+
+| Module | Main Components |
+|:---|:---|
+| Authentication & Routing | SplashActivity, LoginActivity, SignupActivity, RoleRouter, AuthIds |
+| Patient Module | HomeActivity, Profile / EditProfile, MyMedicine, MedicineSearch, PlaceOrder, PatientRecords |
+| Emergency Trip | PatientAmbulanceActivity, EmergencyDispatch, DispatchHelper, TripMapActivity, GuardianTrackActivity |
+| Staff Dashboards | AmbulanceDashboard, NurseDashboard, HospitalDashboard, HospitalAmbulances, AmbulanceTrack |
+| Face Scan & Patient Details | FaceScanActivity, CameraActivity, PatientDetailsActivity, AppConfig |
+| Helpers | Fs (Firestore, SMS, codes), RouteHelper, MapUi, HospitalFinder, MedicineCatalog |
+| External | Face server (Flask + DeepFace), Firebase, OSM / OSRM / Overpass |
+
+---
+
+### Data Model (Cloud Firestore)
+
+**Figure 4.8 – Data Model (Cloud Firestore Collections)**
+
+![Data Model](docs/images/figure-4.8-data-model.webp)
+
+| Collection | Purpose | Key Fields |
+|:---|:---|:---|
+| `hospitals` | Hospital registry | name, lat/lng, nurseUid, nurseNic/Phone |
+| `ambulances` | Ambulance fleet | vehicleNumber, hospitalId, online/available/busy, currentRequestId |
+| `requests` | Ambulance requests | requesterUid, status, targetAmbulanceId, pickup/hospital locations, timestamps |
+| `Patients` | All user accounts | role, profile, medical info, patientCode, medicineList, vehicleNumber / hospitalId |
+| `Emergencies` | Emergency face-scan log | type, patient details, condition, location, status |
+| `Orders` | Medicine orders | userId, medicines[], total, status |
+| `records` | Sub-collection under Patients | category, type, title, notes, imageB64, hospital/nurse refs |
+| `AmbulanceTracks` | Live tracking (legacy) | live lat/lng + patient meta |
+
+> Document model as implemented (`Fs.java`): Firestore has no joins, so a "foreign key" is a stored document ID. `1` = one, `*` = many.
+
+---
+
+### Emergency Ambulance Request Sequence
+
+**Figure 4.3 – Sequence: Emergency Ambulance Request and Dispatch**
+
+![Sequence Diagram](docs/images/figure-4.3-sequence-emergency-dispatch.webp)
+
+**Happy Path:**
+
+1. Patient taps **"Request nearest ambulance"** and allows location access.
+2. App creates `requests/{id}` with `status = searching`.
+3. System queries online and available ambulances to identify the nearest one.
+4. Status becomes `requested` with `targetAmbulanceId`.
+5. Offer received on ambulance app (sound + Accept / Decline).
+6. Accept → `status = accepted` + ambulance/driver details; live GPS shared.
+7. Patient sees live trip map (route, distance, ETA).
+8. Patient picked up → `status = picked_up`, hospital chosen.
+9. Emergency SMS sent to nurse/guardian.
+10. Trip finished → `status = completed`, ambulance becomes available again.
+
+**Alternative Path:**
+
+Decline or no answer within 30 seconds → offer goes to the next nearest ambulance.
+
+---
+
+### Ambulance Request Status Lifecycle
+
+**Figure 4.3b – Ambulance Request Status Lifecycle (`Fs.java`)**
+
+![Status Lifecycle](docs/images/figure-4.3b-request-status-lifecycle.webp)
+
 ```text
-                    ┌──────────────────────┐
-                    │      SEHA App        │
-                    │   Android Platform   │
-                    └──────────┬───────────┘
-                               │
-              ┌────────────────┼────────────────┐
-              │                │                │
-        ┌─────▼─────┐    ┌─────▼─────┐    ┌─────▼─────┐
-        │  Patient  │    │ Ambulance │    │   Nurse   │
-        └───────────┘    └───────────┘    └───────────┘
-              │                │                │
-              └────────────────┼────────────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │   Firebase Cloud    │
-                    │ Authentication      │
-                    │ Firestore           │
-                    │ Storage             │
-                    └──────────┬──────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │ External Services   │
-                    │ Maps / OSRM         │
-                    │ Location Services   │
-                    │ DeepFace API        │
-                    └─────────────────────┘
+searching → requested → accepted → picked_up → completed
+                ↓ (decline / 30s timeout)
+            declined → (next ambulance) or no_ambulance
 ```
+
+Cancellation is possible while the request is in `searching`, `requested`, or `accepted`.
+
+---
+
+### High-Level Component View
+
+```text
+                   ┌──────────────────────┐
+                   │      SEHA App        │
+                   │   Android Platform   │
+                   └──────────┬───────────┘
+                              │
+             ┌────────────────┼────────────────┐
+             │                │                │
+       ┌─────▼─────┐    ┌─────▼─────┐    ┌─────▼─────┐
+       │  Patient  │    │ Ambulance │    │   Nurse   │
+       └───────────┘    └───────────┘    └───────────┘
+             │                │                │
+             └────────────────┼────────────────┘
+                              │
+                   ┌──────────▼──────────┐
+                   │   Firebase Cloud    │
+                   │ Authentication      │
+                   │ Firestore           │
+                   │ Storage             │
+                   └──────────┬──────────┘
+                              │
+                   ┌──────────▼──────────┐
+                   │ External Services   │
+                   │ Maps / OSRM         │
+                   │ Location Services   │
+                   │ DeepFace API        │
+                   └─────────────────────┘
+```
+
+---
 
 ### Repository Structure
 
@@ -143,17 +250,21 @@ SEHA/
 │
 ├── app/
 │   └── src/main/
-│       ├── java/com/example/seha/
-│       │   └── Android application logic
-│       │
-│       ├── res/
-│       │   └── Layouts, drawables and resources
-│       │
+│       ├── java/com/example/seha/     # Android application logic
+│       ├── res/                       # Layouts, drawables, resources
 │       └── AndroidManifest.xml
 │
 ├── DeepFaceServer/
 │   ├── app.py
 │   └── faces/
+│
+├── docs/
+│   └── images/
+│       ├── figure-4.0-system-architecture.webp
+│       ├── figure-4.2-class-module-diagram.webp
+│       ├── figure-4.3-sequence-emergency-dispatch.webp
+│       ├── figure-4.3b-request-status-lifecycle.webp
+│       └── figure-4.8-data-model.webp
 │
 ├── firestore.rules
 ├── FIRESTORE_AND_DEMO_GUIDE.md
@@ -168,12 +279,10 @@ SEHA/
 
 ### Prerequisites
 
-Before running the project, make sure you have:
-
 - Android Studio with Android SDK 36.
 - JDK 11-compatible toolchain.
 - A Firebase project.
-- An Android emulator or physical Android device.
+- Android emulator or physical device.
 - Python 3 (for the optional face recognition service).
 - Internet connectivity.
 
@@ -208,7 +317,7 @@ app/google-services.json
 7. Create a Cloud Firestore database.
 8. Publish the project's `firestore.rules` after reviewing them.
 
-**Important:** Review and test Firebase security rules before using any non-demo data. The included rules are intended for the current academic/demo workflow and are not a complete production security policy.
+> **Important:** The included Firestore rules are intended for academic/demo use only. Review and harden them before any non-demo data is stored.
 
 ### 3. Run the Android Application
 
@@ -216,8 +325,8 @@ app/google-services.json
 2. Allow Gradle synchronization to complete.
 3. Verify Firebase configuration.
 4. Select the `app` run configuration.
-5. Connect an Android device or launch an emulator.
-6. Grant the necessary permissions when prompted.
+5. Connect a device or launch an emulator.
+6. Grant the required permissions when prompted.
 7. Run the application.
 
 ### 4. Build Debug APK
@@ -234,7 +343,7 @@ gradlew.bat assembleDebug
 ./gradlew assembleDebug
 ```
 
-Generated APK location:
+APK location:
 
 ```text
 app/build/outputs/apk/debug/app-debug.apk
@@ -250,7 +359,6 @@ SEHA includes an optional Python-based face recognition service powered by DeepF
 
 ```bash
 cd DeepFaceServer
-
 python -m venv .venv
 ```
 
@@ -285,7 +393,7 @@ The server listens on port `5000`.
 1. Connect the computer and Android device to the same Wi-Fi network.
 2. Find the computer's local network IP address.
 3. Open Face Scan in the application.
-4. Long-press the status text to configure the server URL.
+4. Long-press the status text to configure the server URL:
 
 ```text
 http://<COMPUTER_LAN_IP>:5000
@@ -301,7 +409,7 @@ Replace the placeholder with the computer's actual LAN IP address.
 
 Create demonstration accounts using the application's Sign Up screen.
 
-Recommended registration sequence:
+**Recommended registration sequence:**
 
 | Step | Role | Registration |
 |:---:|:---|:---|
@@ -319,15 +427,13 @@ Recommended registration sequence:
 | Ambulance | Vehicle Number |
 | Hospital | Selected Hospital |
 
-For complete demonstration instructions, refer to:
-
-**[FIRESTORE_AND_DEMO_GUIDE.md](FIRESTORE_AND_DEMO_GUIDE.md)**
+For complete demonstration instructions, see **[FIRESTORE_AND_DEMO_GUIDE.md](FIRESTORE_AND_DEMO_GUIDE.md)**.
 
 ---
 
 ## 🔐 Permissions
 
-The application uses Android permissions for:
+The application requests the following Android permissions:
 
 - Internet connectivity.
 - Network state.
@@ -335,7 +441,7 @@ The application uses Android permissions for:
 - Camera access.
 - SMS sending.
 
-Permission access depends on Android runtime permission approval and device capabilities.
+Permission access depends on runtime approval and device capabilities.
 
 ---
 

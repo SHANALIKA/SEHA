@@ -113,13 +113,19 @@ SEHA aims to demonstrate how modern mobile technologies and cloud-based services
 
 SEHA follows a role-based application structure where different users interact with the system through dedicated modules.
 
-### System Architecture
+### 1. System Architecture
 
 **Figure 4.0 – System Architecture (SEHA)**
 
-![System Architecture](docs/images/figure-4.0-system-architecture.webp)
+![SEHA System Architecture](Document/images/figure-4.0-system-architecture.webp)
 
-The SEHA Android application (Java, minSdk 24) serves five user roles: **Patient**, **Ambulance driver**, **Nurse**, **Hospital staff**, and **Guardian** (no account).
+The SEHA Android application (Java, minSdk 24) serves five user roles:
+
+- Patient
+- Ambulance driver
+- Nurse
+- Hospital staff
+- Guardian (tracking access without a separate account)
 
 It communicates with:
 
@@ -130,11 +136,11 @@ It communicates with:
 
 ---
 
-### Class / Module Diagram
+### 2. Class / Module Diagram
 
 **Figure 4.2 – Class / Module Diagram (package `com.example.seha`)**
 
-![Class / Module Diagram](docs/images/figure-4.2-class-module-diagram.webp)
+![SEHA Class and Module Diagram](Document/images/figure-4.2-class-module-diagram.webp)
 
 | Module | Main Components |
 |:---|:---|
@@ -148,11 +154,11 @@ It communicates with:
 
 ---
 
-### Data Model (Cloud Firestore)
+### 3. Data Model (Cloud Firestore)
 
 **Figure 4.8 – Data Model (Cloud Firestore Collections)**
 
-![Data Model](docs/images/figure-4.8-data-model.webp)
+![SEHA Firestore Data Model](Document/images/figure-4.8-data-model.webp)
 
 | Collection | Purpose | Key Fields |
 |:---|:---|:---|
@@ -169,11 +175,11 @@ It communicates with:
 
 ---
 
-### Emergency Ambulance Request Sequence
+### 4. Emergency Ambulance Request Sequence
 
 **Figure 4.3 – Sequence: Emergency Ambulance Request and Dispatch**
 
-![Sequence Diagram](docs/images/figure-4.3-sequence-emergency-dispatch.webp)
+![SEHA Emergency Ambulance Dispatch Sequence](Document/images/figure-4.3-sequence-emergency-dispatch.webp)
 
 **Happy Path:**
 
@@ -194,56 +200,87 @@ Decline or no answer within 30 seconds → offer goes to the next nearest ambula
 
 ---
 
-### Ambulance Request Status Lifecycle
+### 5. Ambulance Request Status Lifecycle
 
 **Figure 4.3b – Ambulance Request Status Lifecycle (`Fs.java`)**
 
-![Status Lifecycle](docs/images/figure-4.3b-request-status-lifecycle.webp)
+![SEHA Ambulance Request Status Lifecycle](Document/images/figure-4.3b-request-status-lifecycle.webp)
+
+**Request Status Flow:**
 
 ```text
 searching → requested → accepted → picked_up → completed
-                ↓ (decline / 30s timeout)
-            declined → (next ambulance) or no_ambulance
+                ↓
+        decline / 30s timeout
+                ↓
+             declined
+                ↓
+       next ambulance / no_ambulance
 ```
 
 Cancellation is possible while the request is in `searching`, `requested`, or `accepted`.
 
 ---
 
-### High-Level Component View
+### 6. High-Level Component View
 
-```text
-                   ┌──────────────────────┐
-                   │      SEHA App        │
-                   │   Android Platform   │
-                   └──────────┬───────────┘
-                              │
-             ┌────────────────┼────────────────┐
-             │                │                │
-       ┌─────▼─────┐    ┌─────▼─────┐    ┌─────▼─────┐
-       │  Patient  │    │ Ambulance │    │   Nurse   │
-       └───────────┘    └───────────┘    └───────────┘
-             │                │                │
-             └────────────────┼────────────────┘
-                              │
-                   ┌──────────▼──────────┐
-                   │   Firebase Cloud    │
-                   │ Authentication      │
-                   │ Firestore           │
-                   │ Storage             │
-                   └──────────┬──────────┘
-                              │
-                   ┌──────────▼──────────┐
-                   │ External Services   │
-                   │ Maps / OSRM         │
-                   │ Location Services   │
-                   │ DeepFace API        │
-                   └─────────────────────┘
+The following diagram illustrates the four main application entities and their connections to the backend and external services.
+
+```mermaid
+flowchart TB
+
+    subgraph SEHA["SEHA Android Application"]
+        P["Patient"]
+        A["Ambulance"]
+        N["Nurse"]
+        H["Hospital"]
+    end
+
+    subgraph FIREBASE["Firebase Backend"]
+        AUTH["Firebase Authentication"]
+        DB["Cloud Firestore"]
+        STORAGE["Firebase Storage"]
+    end
+
+    subgraph EXTERNAL["External Services"]
+        MAP["OpenStreetMap / osmdroid"]
+        ROUTE["OSRM Routing API"]
+        GPS["Google Play Services Location"]
+        FACE["Python Flask / DeepFace API"]
+    end
+
+    P --> AUTH
+    A --> AUTH
+    N --> AUTH
+    H --> AUTH
+
+    P <--> DB
+    A <--> DB
+    N <--> DB
+    H <--> DB
+
+    P --> STORAGE
+    A --> STORAGE
+    N --> STORAGE
+    H --> STORAGE
+
+    P --> MAP
+    A --> MAP
+    N --> MAP
+
+    P --> GPS
+    A --> GPS
+    N --> GPS
+
+    P --> ROUTE
+    A --> ROUTE
+
+    N --> FACE
 ```
 
 ---
 
-### Repository Structure
+## 📁 Repository Structure
 
 ```text
 SEHA/
@@ -258,7 +295,7 @@ SEHA/
 │   ├── app.py
 │   └── faces/
 │
-├── docs/
+├── Document/
 │   └── images/
 │       ├── figure-4.0-system-architecture.webp
 │       ├── figure-4.2-class-module-diagram.webp
@@ -289,7 +326,7 @@ SEHA/
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_GIT_REPOSITORY_URL>
+git clone https://github.com/SHANALIKA/SEHA.git
 cd SEHA
 ```
 
